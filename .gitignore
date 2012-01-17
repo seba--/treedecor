@@ -1,0 +1,15 @@
+*~
+*.bak
+.\#.gitignore
+
+# Eclipse project
+.metadata/
+
+# Eclipse-generated files
+bin/
+
+# Spoofax stuff
+decorator.dsl/.cache
+decorator.dsl/editor/*.generated.esv
+decorator.dsl/include/
+decorator.dsl/syntax/*generated.pp

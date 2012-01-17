@@ -1,0 +1,7 @@
+Tree decorations
+================
+
+This project aims to disentangle IDEs from the languages they support. To this
+end, we define a language-independent source code representation called
+decorated trees, which an IDE renders to present various editor services to its
+users.

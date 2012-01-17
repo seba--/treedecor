@@ -1,0 +1,111 @@
+/*
+ * Coloring
+ */
+
+/*
+ * Selector abstraction.
+ * Selector definitions can be used in place, i.e., without abstraction.
+ * Selectors are inspired by XPath.
+ *
+ * Recursive selection must be made explicit by selecting the root node as well
+ * as all of its descendants. Possible shorthand notation: `Element/ElemName..`
+ */
+selector xml-elem-name = 
+  Element/ElemName | 
+  Element/ElemName/.. |
+  EmptyElement/ElemName |
+  EmptyElement/ElemName/..
+
+selector weaker-xml-elem-name =
+  ElemName | ElemName/..
+
+/*
+ * Decoration abstraction.
+ * Decorations can be used in place, i.e., without abstraction.
+ * Decorations are inspired by CSS.
+ */
+decoration blue-font = {
+  text-color = "blue"
+}
+decoration red-font = {
+  text-color = "red"
+}
+decoration bold-font = {
+  font-weight = "bold"
+}
+
+decorate ?xml-elem-name with { blue-font }
+decorate ?weaker-xml-elem-name with { red-font bold-font }
+
+/*
+ * This decorate directive uses in-place selections and decorations. Furthermore,
+ * this decorate directive uses the most specific selection and therefore is preferred
+ * over the two previous decorations.
+ */
+decorate ?xml-elem-name & ?weaker-xml-elem-name with { text-color = "yellow" }
+
+
+/* Result: 
+ * A `ElemName` node will appear blue and bold whenever the node is a
+ * direct child of either `Element` or `EmptyElement`, that is, if the node
+ * is selected by `xml-elem-name`. Otherwise, the `ElemName` node will appear
+ * red and bold because the `weaker-xml-elem-name` selector is less specific
+ * then the `xml-elem-name` selector.
+ */
+
+
+
+/*
+ * Reference resolution
+ */
+
+selector var-dec =
+  Lambda/Binder/Var
+
+/*
+ * `~` means "not". Hence, this selector describes the set of those `Var` nodes
+ * that are not direct child of a `Binder` node.
+ * 
+ * This definition does not compose so well with other languages, where `Var`
+ * might be used in unexpected contexts. Better: union over all known `Var`
+ * usages, i.e., explicitly list constructors.
+ */
+selector var-use = ~Binder/Var
+
+/*
+ * Functions can be used to derive values, e.g., other nodes (here) or strings.
+ * 
+ * This variable lookup works for something like the lambda calculus, where
+ * declarations must always be in parent nodes. In Java, for example, we would
+ * need a special treatment of `Seq` nodes, where the bindings of the first
+ * statement flow into the second one.
+ *
+ * `match` and `select` are predefined functions that use a selector
+ */
+function find-var-dec(node, var) =
+  if select(var-dec, node) == [var]
+  then head(select(var-dec, node))
+  else if is-root(node)
+       then fail "could not find matching declaration"
+       else find-var-dec(parent(node), var)
+
+
+decoration var-reference = {
+  reference      = catch-failure(find-var-dec(current, current), null)
+}
+
+decorate ?var-use with { var-reference }
+
+
+
+/*
+ * Decoration representation:
+ * In a concrete program (syntax tree), decorations are represented as
+ * annotations in the syntax tree. That is, the tree is retained in its original
+ * structure, but additional mark-up annotations are added. These annotations
+ * may contain references to other parts of the tree, e.g., for reference
+ * resolving. Should we also support references to other annotations? Would be
+ * more regular. Maybe this would allow something like reference forwarding
+ * (point to what this guy is pointing to).
+ * 
+ */

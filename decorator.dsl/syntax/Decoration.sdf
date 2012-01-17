@@ -1,0 +1,21 @@
+module Decoration
+imports Common
+        Function
+exports
+  
+  context-free syntax
+  	ID -> DecorationId {cons("DecorationId")}
+    "decoration" DecorationId "=" DecorationBody -> Decoration {cons("Decoration")}
+  
+  context-free syntax
+  	"{" DecorationProp* "}" -> DecorationBody {cons("DecorationBody")}
+  	
+  	ID -> PropId {cons("PropId")}
+  	PropId "=" DecorationValue -> DecorationProp {cons("DecorationProp")}
+  	
+    STRING -> DecorationValue {cons("StringDecorationValue")}
+    INT -> DecorationValue {cons("IntDecorationValue")}
+    "[" {DecorationValue ","}* "]" -> DecorationValue {cons("ListDecorationValue")}
+  	"current" -> DecorationValue {cons("CurrentTermDecorationValue")}
+  	"null" -> DecorationValue {cons("NullTermDecorationValue")}
+  	FunctionId "(" {DecorationValue ","}* ")" -> DecorationValue {cons("FunctionAppDecorationValue")}

@@ -1,0 +1,16 @@
+%% Grammar for the TreeDecorator language
+module Decorate
+
+imports Common
+        Selector
+        Decoration
+exports
+  
+  context-free syntax
+    "decorate" SelectorExpr "with" DecorateBody -> Decorate {cons("Decorate")}
+    
+    "{" DecorateDecoration* "}" -> DecorateBody {cons("DecorateBody")}
+    
+    DecorationProp -> DecorateDecoration
+    DecorationId -> DecorateDecoration
+    

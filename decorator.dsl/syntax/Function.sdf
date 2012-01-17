@@ -1,0 +1,56 @@
+module Function
+imports Common
+exports
+  
+  context-free syntax
+  	ID -> FunctionId {cons("FunctionId")}
+  	ID -> VarId {cons("VarId")}
+    "function" FunctionId FunctionParameters "=" FunctionBody -> Function {cons("Function")}
+    
+    "(" {VarId ","}* ")" -> FunctionParameters {cons("FunctionParameters")}
+    
+    Expr -> FunctionBody {cons("FunctionBody")}
+    
+  context-free syntax
+    "null" -> Expr {cons("NullValue")}
+    INT -> Expr {cons("IntValue")}
+    STRING -> Expr {cons("StringValue")}
+    
+    VarId -> Expr {cons("VarExpr")}
+    
+    "[" {Expr ","}* "]" -> Expr {cons("ListExpr")}
+    
+    FunctionId "(" {Expr ","}* ")" -> Expr {cons("FunctionAppExpr")}
+    
+    "if" Expr "then" Expr "else" Expr -> Expr {cons("IfExpr")}
+  
+    "fail" STRING -> Expr {cons("FailExpr")}
+  
+    "(" Expr ")" -> Expr {bracket}
+  
+  context-free priorities
+    "-" Expr -> Expr {cons("NegateExpr")}
+    >
+    { right:
+      Expr "*" Expr -> Expr {cons("MulExpr")}
+      Expr "/" Expr -> Expr {cons("DivExpr")}
+    }
+    >
+    { right:
+      Expr "+" Expr -> Expr {cons("AddExpr")}
+      Expr LAYOUT "-" Expr -> Expr {cons("SubExpr")}
+      Expr "-" LAYOUT Expr -> Expr {cons("SubExpr"), avoid}
+    }
+    >
+    { 
+      Expr "==" Expr -> Expr {cons("EqTestExpr")}
+      Expr "!=" Expr -> Expr {cons("NeqTestExpr")}
+    }
+    > 
+    "!" Expr -> Expr {cons("NotExpr")}
+    >
+    Expr "&&" Expr -> Expr {cons("AndExpr"), right}
+    >
+    Expr "||" Expr -> Expr {cons("OrExpr"), right}
+
+    

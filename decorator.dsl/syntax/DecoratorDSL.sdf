@@ -1,0 +1,28 @@
+%% Grammar for the TreeDecorator language
+module DecoratorDSL
+
+imports Common
+        Selector
+        Decoration
+        Function
+        Decorate
+
+exports
+
+  context-free start-symbols
+    Start
+
+  context-free syntax
+  	ID -> ModuleId {cons("ModuleId")}
+    "module" ModuleId Imports Body -> Start {cons("Module")}
+    Body -> Start {cons("AnonymousModule")}
+    
+    Import* -> Imports {cons("Imports")}
+    "import" ModuleId -> Import {cons("Import")}
+
+    Definition* -> Body {cons("Body")}
+    
+    Selector -> Definition
+    Decoration -> Definition
+    Function -> Definition
+    Decorate -> Definition

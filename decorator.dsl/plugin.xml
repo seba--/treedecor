@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?eclipse version="3.0"?>
+
+<plugin>
+       <extension point="org.eclipse.imp.runtime.languageDescription">
+          <language extensions="decor" description="DecoratorDSL" language="DecoratorDSL" derivedFrom="DynamicRoot" validator="org.treedecor.decorator.DecoratorDSLValidator" validatorClass="org.treedecor.decorator.DecoratorDSLValidator"></language>
+       </extension>
+       <extension id="org.treedecor.decorator.parser" name="DecoratorDSL Parser" point="org.eclipse.imp.runtime.parser">
+          <parser class="org.treedecor.decorator.DecoratorDSLParseController" language="DecoratorDSL">
+          </parser>
+       </extension>    
+    </plugin>

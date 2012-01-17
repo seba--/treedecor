@@ -1,0 +1,28 @@
+module Selector
+imports Common
+exports
+  
+  context-free syntax
+    ID -> SelectorId {cons("SelectorId")}
+    "selector" SelectorId "=" SelectorExpr -> Selector {cons("Selector")}
+    
+  context-free syntax
+    %% simple
+    "?" SelectorId -> SelectorExpr {cons("SelectorSelect")}
+    ID -> SelectorExpr {cons("NameSelect")}
+    INT -> SelectorExpr {cons("ChildNumSelect")}
+    "*" -> SelectorExpr {cons("AllChildrenSelect")}
+    ".." -> SelectorExpr {cons("DescendantsSelect")}
+    "(" SelectorExpr ")" -> SelectorExpr {bracket}
+    
+
+    
+  context-free priorities
+    %% path composition
+    "~" SelectorExpr -> SelectorExpr {cons("NegateSelect")}
+    >
+    SelectorExpr "/" SelectorExpr -> SelectorExpr {cons("PathSelect"), right}
+    >
+    SelectorExpr "&" SelectorExpr -> SelectorExpr {cons("IntersectionSelect"), right}
+    >
+    SelectorExpr "|" SelectorExpr -> SelectorExpr {cons("UnionSelect"), right}

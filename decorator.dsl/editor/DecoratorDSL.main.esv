@@ -1,0 +1,16 @@
+module DecoratorDSL.main
+
+imports DecoratorDSL-Builders DecoratorDSL-Colorer DecoratorDSL-Completions DecoratorDSL-Folding DecoratorDSL-Outliner DecoratorDSL-References DecoratorDSL-Syntax
+
+language General properties
+                  
+  name          : DecoratorDSL
+  id            : org.treedecor.decorator
+  extends       : Root
+                  
+  description   : "Spoofax/IMP-generated editor for the DecoratorDSL language"
+  url           : http://strategoxt.org
+                  
+  extensions    : decor
+  table         : include/DecoratorDSL.tbl
+  start symbols : Start

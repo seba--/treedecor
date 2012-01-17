@@ -25,7 +25,6 @@ public class DecorationAttachment extends AbstractTermAttachment {
     this.decoration = decoration;
   }
 
-  @Override
   public TermAttachmentType<?> getAttachmentType() {
     return TYPE;
   }

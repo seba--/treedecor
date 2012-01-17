@@ -17,7 +17,6 @@ public class ReferenceResolver implements IReferenceResolver {
   public final String REFERENCE_TEXT = "reference-text";
   
   
-  @Override
   public IStrategoTerm getLinkTarget(Object oNode, IParseController controller) {
     IStrategoTerm node = (IStrategoTerm) oNode;
     
@@ -30,9 +29,6 @@ public class ReferenceResolver implements IReferenceResolver {
     return target;
   }
   
-  
-  
-  @Override
   public String getLinkText(Object oNode) {
     IStrategoTerm node = (IStrategoTerm) oNode;
     

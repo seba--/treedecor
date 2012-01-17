@@ -35,7 +35,6 @@ public class TokenColorer implements ITokenColorer {
   }
 
   
-  @Override
   public TextAttribute getColoring(IParseController controller, Object oToken) {
     IToken token = (IToken) oToken;
     ISimpleTerm node = token.getAstNode();

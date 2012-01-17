@@ -9,6 +9,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.imp.runtime,
  org.eclipse.jface.text,
  org.spoofax.terms,
- org.spoofax.jsglr
+ org.spoofax.jsglr,
+ org.treedecor.terms.java
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: org.treedecor.render.imp,
+ org.treedecor.render.util

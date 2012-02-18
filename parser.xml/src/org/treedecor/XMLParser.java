@@ -1,6 +1,11 @@
 package org.treedecor;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
@@ -49,7 +54,6 @@ public class XMLParser {
 	}
 	
 	public static void main(String[] args) throws ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {
-		
 		IStrategoTerm parseTableTerm = new TermReader(termFactory).parseFromFile("syntax/xml.tbl");
 		ParseTable parseTable = new ParseTable(parseTableTerm, termFactory);
 		ITreeBuilder treeBuilder = new TreeBuilder(false);
@@ -73,5 +77,27 @@ public class XMLParser {
 		
 		System.out.println(parseResult);
 		System.out.println(annotated);
+		System.out.println(fileContentAsString("/home/stefan/foo"));
+		System.out.println(inputStreamAsString(System.in));
+	}
+	
+	private static String fileContentAsString(String fileName) throws IOException {
+		return fileContentAsString(new File(fileName));
+	}
+	
+	private static String fileContentAsString(File file) throws IOException {
+		if (file.length() > Integer.MAX_VALUE)
+			throw new IOException("Input file " + file.getCanonicalPath() + " is too large");
+		BufferedInputStream reader = new BufferedInputStream(new FileInputStream(file)); 
+		return inputStreamAsString(reader);
+	}
+	
+	private static String inputStreamAsString(InputStream in) throws IOException {
+		StringWriter sw = new StringWriter();
+		int c;
+		while ((c = in.read()) != -1) {
+			sw.write(c);
+		}
+		return sw.toString();
 	}
 }

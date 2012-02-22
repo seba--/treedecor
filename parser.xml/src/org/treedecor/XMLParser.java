@@ -41,7 +41,7 @@ public class XMLParser {
 		for (int i = 0; i < children.length; i++) {
 			children[i] = annotateTree(term.getSubterm(i), f);
 		}
-		// build updated current node
+		// rebuild current term with newly annotated children
 		IStrategoList annotations = term.getAnnotations();
 		switch (term.getTermType()) {
 		case IStrategoTerm.APPL:
@@ -68,7 +68,6 @@ public class XMLParser {
 	}
 	
 	public static void main(String[] args) throws ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {
-		
 		IStrategoTerm parseTableTerm = new TermReader(termFactory).parseFromFile("syntax/xml.tbl");
 		ParseTable parseTable = new ParseTable(parseTableTerm, termFactory);
 		ITreeBuilder treeBuilder = new TreeBuilder(false);
@@ -89,7 +88,6 @@ public class XMLParser {
 "</verzeichnis>\n");
 		
 		IStrategoTerm annotated = annotateTree((IStrategoTerm) parseResult, new IFn<IStrategoList, IStrategoTerm>() {
-
 			private IStrategoTuple makeStringIntPair(String s, int i) {
 				return termFactory.makeTuple(termFactory.makeString(s), termFactory.makeInt(i));
 			}

@@ -3,10 +3,15 @@ package org.treedecor;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PosixParser;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoInt;
@@ -145,7 +150,31 @@ public class Parser {
 		return sw.toString();
 	}
 	
-	public static void main(String[] args) {
-		// TODO CLI
+	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {
+		Options options = new Options();
+		options.addOption("t", true, "Path to grammar's .tbl file");
+		options.addOption("i", true, "Input file to be parsed, omit to read from std in");
+		options.addOption("o", true, "Write output to file, omit to write to std out");
+		options.addOption("h", "help", false, "Print help");
+		CommandLine line = (new PosixParser()).parse(options, args);
+		
+		if (!line.hasOption("t") || line.hasOption("h")) {
+			(new HelpFormatter()).printHelp("Treedecorations SDF parser", options );
+			System.exit(1);
+		}
+		Parser parser = new Parser(line.getOptionValue("t"));
+		
+		IStrategoTerm parseResult;
+		if (line.hasOption("i")) {
+			parseResult = parser.parse(new File(line.getOptionValue("i")));
+		} else {
+			parseResult = parser.parse(System.in);
+		}
+		
+		if (line.hasOption("o")) {
+			new FileWriter(line.getOptionValue("o")).write(parseResult.toString());
+		} else {
+			System.out.append(parseResult.toString());
+		}
 	}
 }

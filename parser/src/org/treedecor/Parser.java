@@ -31,9 +31,64 @@ import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.binary.TermReader;
 
 public class Parser {
-	private static ITermFactory termFactory = new TermFactory();
+	protected final ITermFactory termFactory = new TermFactory();
+	protected final ParseTable parseTable;
+	protected final SGLR parser;
 	
-	private static IStrategoTerm annotateTree(IStrategoTerm term, IFn<IStrategoList, IStrategoTerm> f) {
+	public Parser(String pathToTable) throws ParseError, IOException, InvalidParseTableException {
+		IStrategoTerm parseTableTerm = new TermReader(termFactory).parseFromFile(pathToTable);
+		parseTable = new ParseTable(parseTableTerm, termFactory);
+		ITreeBuilder treeBuilder = new TreeBuilder(false);
+		parser = new SGLR(treeBuilder, parseTable);		
+		// Absolutely need to set this (not necessarily to true, crashes otherwise)
+		parser.setUseStructureRecovery(true);
+	}
+
+	public IStrategoTerm parse(File f) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, IOException {
+		return parse(fileContentAsString(f), f.getName());
+	}
+	
+	public IStrategoTerm parse(String s) throws TokenExpectedException, BadTokenException, ParseException, SGLRException {
+		return parse(s, "No file");
+	}
+	
+	public IStrategoTerm parse(InputStream is) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, IOException {
+		return parse(inputStreamAsString(is), "System.in");
+	}
+	
+	public IStrategoTerm parse(String s, String fileName) throws TokenExpectedException, BadTokenException, ParseException, SGLRException {
+		IStrategoTerm parseResult = (IStrategoTerm) parser.parse(s, fileName);
+		IStrategoTerm parseResultWithSourceLocation = annotateTree(parseResult, new IFn<IStrategoList, IStrategoTerm>() {
+			private IStrategoTuple makeStringIntPair(String s, int i) {
+				return termFactory.makeTuple(termFactory.makeString(s), termFactory.makeInt(i));
+			}
+			
+			@Override
+			public IStrategoList invoke(IStrategoTerm term) {
+				ImploderAttachment imploderAttachment = term.getAttachment(ImploderAttachment.TYPE);
+				int startColumn = imploderAttachment.getLeftToken().getColumn();
+				int startLine = imploderAttachment.getLeftToken().getLine();
+				int endColumn = imploderAttachment.getRightToken().getEndColumn();
+				int endLine = imploderAttachment.getLeftToken().getEndLine();
+				
+				return termFactory.makeList(
+						makeStringIntPair("startColumn", startColumn),
+						makeStringIntPair("startLine", startLine),
+						makeStringIntPair("endColumn", endColumn),
+						makeStringIntPair("endLine", endLine));
+			}
+		});
+		return parseResultWithSourceLocation;
+	}
+	
+	/** 
+	 * Bottom up tree annotator.
+	 * 
+	 * Takes a IStratgeoTerm term,
+	 * and a function f, that given an IStrategoTerm returns an IStrategoList suitable for annotations,
+	 * and returns a new tree where each node is annotated with the result of calling f on it.
+	 */
+	protected IStrategoTerm annotateTree(IStrategoTerm term, IFn<IStrategoList, IStrategoTerm> f) {
 		// in leaf
 		if (term.getAllSubterms().length == 0) {
 			return termFactory.annotateTerm(term, f.invoke(term));
@@ -70,71 +125,27 @@ public class Parser {
 		}
 	}
 	
-	
-	
-	public static void main(String[] args) throws ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {
-		IStrategoTerm parseTableTerm = new TermReader(termFactory).parseFromFile("syntax/xml.tbl");
-		ParseTable parseTable = new ParseTable(parseTableTerm, termFactory);
-		ITreeBuilder treeBuilder = new TreeBuilder(false);
-		SGLR parser = new SGLR(treeBuilder, parseTable);		
-		// Absolutely need to set this (not necessarily to true, crashes otherwise)
-		parser.setUseStructureRecovery(true);
-		Object parseResult = parser.parse("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-"<verzeichnis>\n" +
-"     <titel>Wikipedia Städteverzeichnis</titel>\n" +
-"     <eintrag>\n" +
-"          <stichwort>Genf</stichwort>\n" +
-          "<eintragstext>Genf ist der Sitz von ...</eintragstext>\n" +
-     "</eintrag>\n" +
-     "<eintrag>\n" +
-          "<stichwort>Köln</stichwort>\n" +
-          "<eintragstext>Köln ist eine Stadt, die ...</eintragstext>\n" +
-     "</eintrag>\n" +
-"</verzeichnis>\n");
-		
-		IStrategoTerm annotated = annotateTree((IStrategoTerm) parseResult, new IFn<IStrategoList, IStrategoTerm>() {
-			private IStrategoTuple makeStringIntPair(String s, int i) {
-				return termFactory.makeTuple(termFactory.makeString(s), termFactory.makeInt(i));
-			}
-			
-			@Override
-			public IStrategoList invoke(IStrategoTerm term) {
-				ImploderAttachment imploderAttachment = term.getAttachment(ImploderAttachment.TYPE);
-				int startColumn = imploderAttachment.getLeftToken().getColumn();
-				int startLine = imploderAttachment.getLeftToken().getLine();
-				int endColumn = imploderAttachment.getRightToken().getEndColumn();
-				int endLine = imploderAttachment.getLeftToken().getEndLine();
-				
-				return termFactory.makeList(
-						makeStringIntPair("startColumn", startColumn),
-						makeStringIntPair("startLine", startLine),
-						makeStringIntPair("endColumn", endColumn),
-						makeStringIntPair("endLine", endLine));
-			}
-		});
-		System.out.println(parseResult);
-		System.out.println(annotated);
-		System.out.println(fileContentAsString("/home/stefan/foo"));
-		System.out.println(inputStreamAsString(System.in));
-	}
-	
-	private static String fileContentAsString(String fileName) throws IOException {
+	protected static String fileContentAsString(String fileName) throws IOException {
 		return fileContentAsString(new File(fileName));
 	}
 	
-	private static String fileContentAsString(File file) throws IOException {
+	protected static String fileContentAsString(File file) throws IOException {
 		if (file.length() > Integer.MAX_VALUE)
 			throw new IOException("Input file " + file.getCanonicalPath() + " is too large");
 		BufferedInputStream reader = new BufferedInputStream(new FileInputStream(file)); 
 		return inputStreamAsString(reader);
 	}
 	
-	private static String inputStreamAsString(InputStream in) throws IOException {
+	protected static String inputStreamAsString(InputStream in) throws IOException {
 		StringWriter sw = new StringWriter();
 		int c;
 		while ((c = in.read()) != -1) {
 			sw.write(c);
 		}
 		return sw.toString();
+	}
+	
+	public static void main(String[] args) {
+		// TODO CLI
 	}
 }

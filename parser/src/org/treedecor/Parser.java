@@ -28,13 +28,12 @@ import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.ParseError;
 import org.spoofax.terms.TermFactory;
-import org.spoofax.terms.TermVisitor;
 import org.spoofax.terms.io.binary.TermReader;
 
-public class XMLParser {
-	static ITermFactory termFactory = new TermFactory();
+public class Parser {
+	private static ITermFactory termFactory = new TermFactory();
 	
-	public static IStrategoTerm annotateTree(IStrategoTerm term, IFn<IStrategoList, IStrategoTerm> f) {
+	private static IStrategoTerm annotateTree(IStrategoTerm term, IFn<IStrategoList, IStrategoTerm> f) {
 		// in leaf
 		if (term.getAllSubterms().length == 0) {
 			return termFactory.annotateTerm(term, f.invoke(term));
@@ -70,6 +69,8 @@ public class XMLParser {
 			throw new RuntimeException("this should be unreachable ^^ Check IStrategoTerm's list of possible term types");				
 		}
 	}
+	
+	
 	
 	public static void main(String[] args) throws ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {
 		IStrategoTerm parseTableTerm = new TermReader(termFactory).parseFromFile("syntax/xml.tbl");

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.imp.runtime.languageDescription">
+      <language
+            url="https://github.com/seba--/treedecor"
+            extensions="xml"
+            description="Decoupling IDEs from their languages"
+            language="treedecor">
+      </language>
+   </extension>
+   <extension
+         id="renderer.imp.parser"
+         name="treedecor Parser"
+         point="org.eclipse.imp.runtime.parser">
+      <parser
+            class="treedecor.imp.parser.TreedecorParseController"
+            language="treedecor">
+      </parser>
+   </extension>
+   <extension
+         id="renderer.imp.parser"
+         name="treedecor Parser"
+         point="org.eclipse.imp.runtime.parser">
+      <parser
+            class="org.treedecor.imp.TreedecorParseController"
+            language="treedecor">
+      </parser>
+   </extension>
+
+</plugin>

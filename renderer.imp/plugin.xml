@@ -16,15 +16,6 @@
          name="treedecor Parser"
          point="org.eclipse.imp.runtime.parser">
       <parser
-            class="treedecor.imp.parser.TreedecorParseController"
-            language="treedecor">
-      </parser>
-   </extension>
-   <extension
-         id="renderer.imp.parser"
-         name="treedecor Parser"
-         point="org.eclipse.imp.runtime.parser">
-      <parser
             class="org.treedecor.imp.TreedecorParseController"
             language="treedecor">
       </parser>

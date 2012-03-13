@@ -1,6 +1,8 @@
 package org.treedecor.imp;
 
+import java.io.IOException;
 import java.util.Iterator;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.imp.language.Language;
@@ -11,8 +13,16 @@ import org.eclipse.imp.parser.ISourcePositionLocator;
 import org.eclipse.imp.services.IAnnotationTypeInfo;
 import org.eclipse.imp.services.ILanguageSyntaxProperties;
 import org.eclipse.jface.text.IRegion;
+import org.spoofax.jsglr.client.InvalidParseTableException;
+import org.spoofax.terms.ParseError;
+import org.treedecor.Parser;
 
 public class TreedecorParseController implements IParseController {
+
+	private IPath filePath;
+	private ISourceProject project;
+	private IMessageHandler messageHandler;
+	private Parser parser;
 
 	@Override
 	public IAnnotationTypeInfo getAnnotationTypeInfo() {
@@ -38,15 +48,13 @@ public class TreedecorParseController implements IParseController {
 	@Override
 	public IPath getPath() {
 		System.out.println("getPath");
-		// TODO Auto-generated method stub
-		return null;
+		return filePath;
 	}
 
 	@Override
 	public ISourceProject getProject() {
 		System.out.println("getProject");
-		// TODO Auto-generated method stub
-		return null;
+		return project;
 	}
 
 	@Override
@@ -72,18 +80,19 @@ public class TreedecorParseController implements IParseController {
 
 	@Override
 	public void initialize(IPath filePath, ISourceProject project, IMessageHandler handler) {
-		System.out.println("initialize");
-		System.out.println(filePath);
-		System.out.println(project);
-		System.out.println(handler);
-		// TODO Auto-generated method stub
-		
+		this.filePath = filePath;
+		this.project = project;
+		this.messageHandler = handler;
+		try {
+			this.parser = new Parser("");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
-	public Object parse(String arg0, IProgressMonitor arg1) {
+	public Object parse(String input, IProgressMonitor monitor) {
 		System.out.println("parse");
-		// TODO Auto-generated method stub
-		return null;
+		return getCurrentAst();
 	}
 }

@@ -84,7 +84,7 @@ public class TreedecorParseController implements IParseController {
 		this.project = project;
 		this.messageHandler = handler;
 		try {
-			this.parser = new Parser("");
+			this.parser = new Parser("../syntax.xml/xml.tbl");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

@@ -17,7 +17,7 @@ import org.spoofax.jsglr.client.InvalidParseTableException;
 import org.spoofax.terms.ParseError;
 import org.treedecor.Parser;
 
-public class TreedecorParseController implements IParseController {
+public class TreedecorationsParseController implements IParseController {
 
 	private IPath filePath;
 	private ISourceProject project;

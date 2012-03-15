@@ -1,25 +1,25 @@
-package treedecor;
+package treedecorations;
 
 import org.eclipse.imp.runtime.PluginBase;
 import org.osgi.framework.BundleContext;
 
-public class TreedecorPlugin extends PluginBase {
+public class TreedecorationsPlugin extends PluginBase {
 
-	public static final String kPluginID = "renderer.imp";
-	public static final String kLanguageID = "treedecor";
+	public static final String kPluginID = "treedecorationsrenderer";
+	public static final String kLanguageID = "Treedecorations";
 
 	/**
 	 * The unique instance of this plugin class
 	 */
-	protected static TreedecorPlugin sPlugin;
+	protected static TreedecorationsPlugin sPlugin;
 
-	public static TreedecorPlugin getInstance() {
+	public static TreedecorationsPlugin getInstance() {
 		if (sPlugin == null)
-			new TreedecorPlugin();
+			new TreedecorationsPlugin();
 		return sPlugin;
 	}
 
-	public TreedecorPlugin() {
+	public TreedecorationsPlugin() {
 		super();
 		sPlugin = this;
 	}

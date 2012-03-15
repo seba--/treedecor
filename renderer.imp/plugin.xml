@@ -11,5 +11,14 @@
             language="Treedecorations">
       </language>
    </extension>
+   <extension
+         id="renderer.imp.parser"
+         name="Treedecorations Parser"
+         point="org.eclipse.imp.runtime.parser">
+      <parser
+            class="org.treedecor.imp.TreedecorationsParseController"
+            language="Treedecorations">
+      </parser>
+   </extension>
 
 </plugin>

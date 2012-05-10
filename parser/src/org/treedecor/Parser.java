@@ -32,7 +32,6 @@ import org.spoofax.jsglr.shared.BadTokenException;
 import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.ParseError;
-import org.spoofax.terms.StringTermReader;
 import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.binary.TermReader;
 
@@ -151,7 +150,7 @@ public class Parser {
 		return sw.toString();
 	}
 	
-	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {
+	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {		
 		Options options = new Options();
 		options.addOption("t", true, "Path to grammar's .tbl file (required)");
 		options.addOption("i", true, "Input file to be parsed, omit to read from std in");

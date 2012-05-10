@@ -22,7 +22,7 @@ public class TreedecorationsParseController implements IParseController {
 	private IPath filePath;
 	private ISourceProject project;
 	private IMessageHandler messageHandler;
-	private Object currentAst;
+	private IStrategoTerm currentAst;
 
 	@Override
 	public IAnnotationTypeInfo getAnnotationTypeInfo() {
@@ -32,7 +32,7 @@ public class TreedecorationsParseController implements IParseController {
 	}
 
 	@Override
-	public Object getCurrentAst() {
+	public IStrategoTerm getCurrentAst() {
 		System.out.println("getCurrentAst");
 		return currentAst;
 	}
@@ -85,7 +85,7 @@ public class TreedecorationsParseController implements IParseController {
 	}
 
 	@Override
-	public Object parse(String input, IProgressMonitor monitor) {
+	public IStrategoTerm parse(String input, IProgressMonitor monitor) {
 		System.out.println("parse");
 		try {
 			String parseResult = CommandExecution.callSync(getParserExe(), input);

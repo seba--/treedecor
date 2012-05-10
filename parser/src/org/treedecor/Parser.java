@@ -152,7 +152,7 @@ public class Parser {
 	
 	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {
 		Options options = new Options();
-		options.addOption("t", true, "Path to grammar's .tbl file");
+		options.addOption("t", true, "Path to grammar's .tbl file (required)");
 		options.addOption("i", true, "Input file to be parsed, omit to read from std in");
 		options.addOption("o", true, "Write output to file, omit to write to std out");
 		options.addOption("h", "help", false, "Print help");

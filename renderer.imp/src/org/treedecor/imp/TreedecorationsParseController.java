@@ -13,16 +13,13 @@ import org.eclipse.imp.parser.ISourcePositionLocator;
 import org.eclipse.imp.services.IAnnotationTypeInfo;
 import org.eclipse.imp.services.ILanguageSyntaxProperties;
 import org.eclipse.jface.text.IRegion;
-import org.spoofax.jsglr.client.InvalidParseTableException;
-import org.spoofax.terms.ParseError;
-import org.treedecor.Parser;
 
 public class TreedecorationsParseController implements IParseController {
 
 	private IPath filePath;
 	private ISourceProject project;
 	private IMessageHandler messageHandler;
-	private Parser parser;
+	private Object currentAst;
 
 	@Override
 	public IAnnotationTypeInfo getAnnotationTypeInfo() {
@@ -34,8 +31,7 @@ public class TreedecorationsParseController implements IParseController {
 	@Override
 	public Object getCurrentAst() {
 		System.out.println("getCurrentAst");
-		// TODO Auto-generated method stub
-		return null;
+		return currentAst;
 	}
 
 	@Override
@@ -83,16 +79,25 @@ public class TreedecorationsParseController implements IParseController {
 		this.filePath = filePath;
 		this.project = project;
 		this.messageHandler = handler;
-		try {
-			this.parser = new Parser("../syntax.xml/xml.tbl");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	@Override
 	public Object parse(String input, IProgressMonitor monitor) {
 		System.out.println("parse");
+		try {
+			String parseResult = CommandExecution.callSync(getParserExe(), input);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return getCurrentAst();
+	}
+	// TODO: move and make this user configurable
+	private String[] getParserExe() {
+		String[] parserExe = {"/home/stefan/Work/treedecor/parser/parser.sh", "-t", "/home/stefan/Work/treedecor/syntax.xml/xml.tbl"};
+		return parserExe;
 	}
 }

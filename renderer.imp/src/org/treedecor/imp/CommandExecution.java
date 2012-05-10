@@ -38,25 +38,24 @@ public class CommandExecution {
 		}
 	}
 	
-	public static String callSync(String cmd, String[] args, String in) throws IOException, InterruptedException {
-		String[] cmds = new String[args.length+1];
-		System.arraycopy(args, 0, cmds, 1, args.length);
-		cmds[0] = cmd;
-		
-		Process process = Runtime.getRuntime().exec(cmds);
-		
-		Logger logger = new Logger(process.getInputStream());
-		logger.start();
+	public static String callSync(String[] cmdarray, String in) throws IOException, InterruptedException {
+		Process process = Runtime.getRuntime().exec(cmdarray);
 		
 		OutputStreamWriter osw = new OutputStreamWriter(process.getOutputStream());
 		osw.write(in);
-		osw.flush();
-		
+		osw.close();
+
+		Logger logger = new Logger(process.getInputStream());
+		logger.start();
+		Logger errorLogger = new Logger(process.getErrorStream());
+		errorLogger.start();
+
 		process.waitFor();
 		return logger.toString();
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		System.out.println(CommandExecution.callSync("dir", new String[0], ""));
+		String[] cmdarray = {"/bin/ls", "/home/stefan"};
+		System.out.println(CommandExecution.callSync(cmdarray, ""));
 	}
 }

@@ -13,6 +13,9 @@ import org.eclipse.imp.parser.ISourcePositionLocator;
 import org.eclipse.imp.services.IAnnotationTypeInfo;
 import org.eclipse.imp.services.ILanguageSyntaxProperties;
 import org.eclipse.jface.text.IRegion;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.StringTermReader;
+import org.spoofax.terms.TermFactory;
 
 public class TreedecorationsParseController implements IParseController {
 
@@ -86,6 +89,12 @@ public class TreedecorationsParseController implements IParseController {
 		System.out.println("parse");
 		try {
 			String parseResult = CommandExecution.callSync(getParserExe(), input);
+			monitor.worked(1);
+			System.out.println(parseResult);
+			String decorationResult = CommandExecution.callSync(getDecoratorExe(), parseResult);
+			monitor.worked(1);
+			System.out.println(decorationResult);
+			currentAst = parseDecorated(decorationResult);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -95,9 +104,21 @@ public class TreedecorationsParseController implements IParseController {
 		}
 		return getCurrentAst();
 	}
+	
 	// TODO: move and make this user configurable
 	private String[] getParserExe() {
 		String[] parserExe = {"/home/stefan/Work/treedecor/parser/parser.sh", "-t", "/home/stefan/Work/treedecor/syntax.xml/xml.tbl"};
 		return parserExe;
+	}
+	
+	// TODO: move and make this user configurable
+	private String[] getDecoratorExe() {
+		String[] decoratorExe = {"/home/stefan/Work/treedecor/decorator.xml/decorator.sh"};
+		return decoratorExe;
+	}
+	
+	private Object parseDecorated(String s) {
+		StringTermReader str = new StringTermReader(new TermFactory());
+		return str.parseFromString(s);
 	}
 }

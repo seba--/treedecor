@@ -8,7 +8,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.imp.runtime,
  org.eclipse.ui,
  lpg.runtime.java,
- org.eclipse.jface.text
+ org.eclipse.jface.text,
+ org.treedecor.parser.jsglr
 Bundle-Activator: treedecorations.TreedecorationsPlugin
 Eclipse-LazyStart: true
 Bundle-ClassPath: .,

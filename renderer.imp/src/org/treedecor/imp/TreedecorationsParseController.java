@@ -89,12 +89,14 @@ public class TreedecorationsParseController implements IParseController {
 		System.out.println("parse");
 		try {
 			String parseResult = CommandExecution.callSync(getParserExe(), input);
-			monitor.worked(1);
+			System.out.println("Parse result:");
 			System.out.println(parseResult);
 			String decorationResult = CommandExecution.callSync(getDecoratorExe(), parseResult);
-			monitor.worked(1);
+			System.out.println("Decoration result string:");
 			System.out.println(decorationResult);
 			currentAst = parseDecorated(decorationResult);
+			System.out.println("Decoration result ast:");
+			System.out.println(currentAst);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -104,7 +106,7 @@ public class TreedecorationsParseController implements IParseController {
 		}
 		return getCurrentAst();
 	}
-	
+
 	// TODO: move and make this user configurable
 	private String[] getParserExe() {
 		String[] parserExe = {"/home/stefan/Work/treedecor/parser/parser.sh", "-t", "/home/stefan/Work/treedecor/syntax.xml/xml.tbl"};
@@ -117,7 +119,7 @@ public class TreedecorationsParseController implements IParseController {
 		return decoratorExe;
 	}
 	
-	private Object parseDecorated(String s) {
+	private IStrategoTerm parseDecorated(String s) {
 		StringTermReader str = new StringTermReader(new TermFactory());
 		return str.parseFromString(s);
 	}

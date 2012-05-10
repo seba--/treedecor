@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.invoke.VolatileCallSite;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Provides methods for calling external commands.
@@ -15,6 +17,7 @@ public class CommandExecution {
 	private static class Logger extends Thread {
 		private final InputStream in;
 		private final StringBuffer sb = new StringBuffer();
+		private final CountDownLatch cdl = new CountDownLatch(1);
 
 		public Logger(InputStream in) {
 			this.in = in;
@@ -30,10 +33,18 @@ public class CommandExecution {
 				}
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
+			} finally {
+				cdl.countDown();
 			}
 		}
 
 		public String toString() {
+			try {
+				cdl.await();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return sb.toString();
 		}
 	}
@@ -41,14 +52,14 @@ public class CommandExecution {
 	public static String callSync(String[] cmdarray, String in) throws IOException, InterruptedException {
 		Process process = Runtime.getRuntime().exec(cmdarray);
 		
-		OutputStreamWriter osw = new OutputStreamWriter(process.getOutputStream());
-		osw.write(in);
-		osw.close();
-
 		Logger logger = new Logger(process.getInputStream());
 		logger.start();
 		Logger errorLogger = new Logger(process.getErrorStream());
 		errorLogger.start();
+
+		OutputStreamWriter osw = new OutputStreamWriter(process.getOutputStream());
+		osw.write(in);
+		osw.close();
 
 		process.waitFor();
 		return logger.toString();

@@ -5,5 +5,11 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="/home/stefan/Work/treedecor/parser/lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="/home/stefan/Work/treedecor/parser/lib/strategoxt.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-8.1.3.v20120416.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-8.1.3.v20120416.jar"/>
+	<classpathentry kind="lib" path="lib/servlet-api-3.0.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-http-8.1.3.v20120416.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-io-8.1.3.v20120416.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-continuation-8.1.3.v20120416.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

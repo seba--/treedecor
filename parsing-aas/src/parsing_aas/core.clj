@@ -41,9 +41,6 @@
 (defn parse [table stream]
   (str (.parse ^Parser (make-parser table) ^java.io.InputStream stream)))
 
-(defn parse [table stream]
-  (slurp stream))
-
 (defn reinit! []
   ;; clear parser cache
   (memo/memo-clear! make-parser)

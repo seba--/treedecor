@@ -4,5 +4,5 @@
   :dependencies [[compojure "1.1.0"]
                  [org.clojure/clojure "1.4.0"]
                  [org.clojure/core.cache "0.5.0"]
-                 [treedecor-parser "0.0.1"]
+                 [treedecor-parser "0.0.2"]
                  [ring "1.1.0"]])

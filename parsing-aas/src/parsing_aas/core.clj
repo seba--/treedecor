@@ -4,61 +4,57 @@
         ring.middleware.stacktrace
 ;        ring.middleware.multipart-params
         compojure.core
+        [clojure.java.shell :only [sh]]
         )
   (:require [clojure.java.io :as io]
-            [clojure.core.memoize :as memo])
+            [clojure.core.cache :as cache])
   (:import java.util.UUID
            org.treedecor.Parser))
 
-(def port 8080)
-(def table-base-path "/tmp/parsing-aas/tables")
-(def parser-cache-size 10)
+(def config (atom {:s2t-exec          "/usr/bin/sdf2table"
+                   :port              "8080"
+                   :parser-cache-size "20"}))
+
+(def parser-cache (atom {}))
 
 (defn uuid [] (.toString (java.util.UUID/randomUUID)))
 
-(defn table-file [name] (io/file table-base-path (str name ".tbl")))
+(defn parse [table-id stream]
+  (if-let [parser (get-parser table-id)]
+    (str (.parse ^Parser (get-parser table-id) ^java.io.InputStream stream))
+    {:status 410 ; Gone
+     :body "Please (re-)register your grammar or table."
+     }))
 
-(defn create-table! [stream]
-  (let [name (uuid)]
-    (io/copy stream (table-file name))
-    name))
+(defn sdf-to-table
+  ([def module]
+     (sh (:s2t-exec config) "-m" module :in def :out :bytes)))
 
-(defn delete-table! [name]
-  (io/delete-file (table-file name))
-  (str "Deleted table " name))
+(defn make-parser [tbl]
+  (Parser. tbl))
 
-(defn delete-all-tables! []
-  (doseq [f (file-seq (io/file table-base-path))]
-    (if (.endsWith (str f) ".tbl")
-      (io/delete-file f :silently))))
+(defn get-parser [grammar-hash]
+  (get @parser-cache grammar-hash))
 
-(def make-parser
-  (memo/memo-lru
-   (fn [table-name]
-     (Parser. (str (table-file table-name))))
-   parser-cache-size))
+(defn register-table [id tbl]
+  (swap! parser-cache assoc id (make-parser tbl))
+  {:status 201 ; Created
+   :headers {"Location" (str "/table/" id)}
+   :body id})
 
-(defn parse [table stream]
-  (str (.parse ^Parser (make-parser table) ^java.io.InputStream stream)))
-
-(defn reinit! []
-  ;; clear parser cache
-  (memo/memo-clear! make-parser)
-  ;; create table base directory if needed
-  (io/make-parents (table-file (uuid)))  
-  ;; delete existing .tbl files
-  (delete-all-tables!)
-  "Reinitialized")
+(defn register-grammar [in-stream module]
+  (let [def (slurp in-stream)
+        hash (hash def)]
+    (if (get-parser hash)
+      hash
+      (register-table hash (:out (sdf-to-table def module))))))
 
 (defroutes handler
-  (GET "/" {params :params
-            body :body} (str "hello" (type body)))
-  (GET "/parse/:table" {{table :table} :params
-                        body :body} (parse table body))
-  (POST "/table" {body :body} (create-table! body))
-  (DELETE "/table/:id" [id] (delete-table! id))
-  (DELETE "/table" [] (delete-all-tables!))
-  (ANY "/reinit!" [] (reinit!)))
+  (POST "/grammar" {body   :body
+                    params :params} (register-grammar body (get "module" params "Main")))
+  (GET "/parse/:table-id" {{table-id :table-id} :params
+                           body :body} (parse table-id body))
+  (POST "/table" {body :body} (register-table (uuid) body)))
 
 (def app
   (-> #'handler
@@ -69,11 +65,14 @@
 
 (comment ;; use this instead of defonce for deployment
   (defn -main [& args]
+    (swap! config merge (read-string (first args)))
+    (swap! parser-cache #(cache/lru-cache-factory (Integer/parseInt (:parser-cache-size @config) 10) %))
     (reinit!)
     (run-jetty #'app {:port port})))
 
+(swap! parser-cache #(cache/lru-cache-factory (Integer/parseInt (:parser-cache-size @config) 10) %))
 (defonce server
-  (run-jetty #'app {:port port}))
+  (run-jetty #'app {:port (Integer/parseInt (:port @config) 10)}))
 
 
 ;; TODO use hash of the .tbl for identification instead of UUID? what does sugarj use for grammars?

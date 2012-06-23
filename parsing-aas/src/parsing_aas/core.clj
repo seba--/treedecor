@@ -31,7 +31,7 @@
      (sh (:s2t-exec @config) "-m" module :in def :out-enc :bytes)))
 
 (defn make-parser [tbl]
-  (Parser. tbl))
+  (Parser. ^bytes tbl))
 
 (defn register-table [id tbl]
   (swap! parser-cache assoc id (make-parser tbl))
@@ -50,8 +50,9 @@
         (register-table hash (:out (sdf-to-table def module)))))))
 
 (defroutes handler
-  (POST "/grammar" {body   :body
-                    params :params} (register-grammar body (get "module" params "Main")))
+  (POST "/grammar" {body                                  :body
+                    {module "module" :or {module "Main"}} :params}
+        (register-grammar body module))
   (GET "/parse/:table-id" {{table-id :table-id} :params
                            body :body} (parse table-id body))
   (POST "/table" {body :body} (register-table (uuid) body)))
@@ -86,17 +87,8 @@
 ;; make sure to use proper content type for sending post stuff. wrap-params eats
 ;; form-url-encoded bodies as sent by web browsers. Not sure whether multipart params is needed
 ;; use e.g. this for testing (reads post data from stdin, use --data-binary @filename to read and send a file as is)
-;; $ curl -X POST -H'Content-Type: application/binary' -d @- http://127.0.0.1:8080/table/
-
-;; post xml table (note uuid)
-;; $ curl -X POST -H'Content-Type:application/binary' --data-binary @/home/stefan/Work/treedecor/syntax.xml/xml.tbl http://127.0.0.1:8080/table
-
-;; parse xml document replace $TABLE with uuid noted before
-;; $ curl -X GET -H'Content-Type: application/binary' -d @/home/stefan/Work/treedecor/renderer.imp/plugin.xml http://127.0.0.1:8080/parse/$TABLE
-;; after warmup sub 20ms for project.xml from renderer.imp
-
 
 ;; Register grammar
-;;   curl -X POST -H'Content-Type:application/x-sdf' --data-binary @xml.def http://127.0.0.1:8080/grammar?module=xml
-;; Parse file (doesn't work... probably encoding stuff)
-;;   curl -X GET -H'Content-Type: application/binary' -d @/home/stefan/Work/treedecor/renderer.imp/plugin.xml http://127.0.0.1:8080/parse/-993726346
+;;   curl -X POST -H 'Content-Type:application/x-sdf' --data-binary @xml.def http://127.0.0.1:8080/grammar?module=xml
+;; Parse file
+;;   curl -X GET -H 'Content-Type: application/binary' -d @/home/stefan/Work/treedecor/renderer.imp/plugin.xml http://127.0.0.1:8080/parse/-993726346

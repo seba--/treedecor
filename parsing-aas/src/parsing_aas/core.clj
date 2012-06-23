@@ -10,8 +10,8 @@
            org.treedecor.Parser))
 
 (def config (atom {:s2t-exec          "/usr/bin/sdf2table"
-                   :port              "8080"
-                   :parser-cache-size "20"}))
+                   :port              8080
+                   :parser-cache-size 20}))
 
 (def parser-cache (atom {}))
 
@@ -65,13 +65,12 @@
 (comment ;; use this instead of defonce for deployment
   (defn -main [& args]
     (swap! config merge (read-string (first args)))
-    (swap! parser-cache #(cache/lru-cache-factory (Integer/parseInt (:parser-cache-size @config) 10) %))
+    (swap! parser-cache #(cache/lru-cache-factory (:parser-cache-size @config) %))
     (reinit!)
-    (run-jetty #'app {:port port})))
+    (run-jetty #'app {:port (:port @config)})))
 
-(swap! parser-cache #(cache/lru-cache-factory (Integer/parseInt (:parser-cache-size @config) 10) %))
 (defonce server
-  (run-jetty #'app {:port (Integer/parseInt (:port @config) 10)}))
+  (run-jetty #'app {:port (:port @config)}))
 
 
 ;; install localrepo leiningen plugin:

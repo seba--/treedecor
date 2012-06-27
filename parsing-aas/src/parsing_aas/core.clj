@@ -3,6 +3,7 @@
         ring.middleware.params
         ring.middleware.stacktrace
         compojure.core
+        [compojure.route :only [files]]
         [clojure.java.shell :only [sh]])
   (:require [clojure.java.io :as io]
             [clojure.core.cache :as cache])
@@ -47,7 +48,11 @@
        :body "No content. Fix your client. Try using Content-Type:application/x-sdf"}
       (if (get-parser hash)
         hash
-        (register-table hash (:out (sdf-to-table def module)))))))
+        (let [ext-call (sdf-to-table def module)]
+          (if (= (:exit ext-call) 0)
+            (register-table hash (:out ext-call))
+            {:status 422
+             :body (:err ext-call)}))))))
 
 (defroutes handler
   (POST "/grammar" {body                                  :body
@@ -56,7 +61,9 @@
   (GET "/table" [] (apply str (interpose "\n" (keys @parser-cache))))
   (GET "/parse/:table-id" {{table-id :table-id} :params
                            body :body} (parse table-id body))
-  (POST "/table" {body :body} (register-table (uuid) body)))
+  (POST "/table" {body :body} (register-table (uuid) body))
+  (files "/" {:root "web"})
+)
 
 (def app
   (-> #'handler

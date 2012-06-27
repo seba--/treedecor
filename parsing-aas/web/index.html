@@ -4,8 +4,22 @@
     <title>SGLR Parsing as a Service</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script type="text/javascript">
+      function postParseSuccess(responseText) {
+        $('[name=parsecontent]').val(responseText)
+      }
+
+      function postParseError(jqxhr) {
+        alert(jqxhr.responseText)
+      }
+
       function parse() {
-        console.log("parse")
+        $.ajax("parse/" + $('[name=parserID]').val(),
+               {'data':$('[name=parsecontent]').val(),
+                'type': 'POST',
+                'processData': false,
+                'contentType': 'text/plain',
+                'success':postParseSuccess,
+                'error':postParseError})
       }
 
       function postDefError(jqxhr) {

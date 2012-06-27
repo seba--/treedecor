@@ -61,6 +61,8 @@
   (GET "/table" [] (apply str (interpose "\n" (keys @parser-cache))))
   (GET "/parse/:table-id" {{table-id :table-id} :params
                            body :body} (parse table-id body))
+  (POST "/parse/:table-id" {{table-id :table-id} :params
+                            body :body} (parse table-id body))
   (POST "/table" {body :body} (register-table (uuid) body))
   (files "/" {:root "web"})
 )

@@ -10,20 +10,23 @@
   (:import java.util.UUID
            org.treedecor.Parser))
 
-(def config (atom {:s2t-exec          "/usr/bin/sdf2table"
-                   :port              8080
-                   :parser-cache-size 20}))
+(def config (atom {:s2t-exec         "/usr/bin/sdf2table"
+                   :port             8080
+                   :table-cache-size 20}))
 
-(def parser-cache (atom {}))
+(def table-cache (atom {}))
 
 (defn uuid [] (.toString (java.util.UUID/randomUUID)))
 
-(defn get-parser [grammar-hash]
-  (get @parser-cache grammar-hash))
+(defn get-table [grammar-hash]
+  (get @table-cache grammar-hash))
+
+(defn make-parser [tbl]
+  (Parser. ^bytes tbl))
 
 (defn parse [table-id stream]
-  (if-let [parser (get-parser table-id)]
-    (str (.parse ^Parser (get-parser table-id) ^java.io.InputStream stream))
+  (if-let [parser (make-parser (get-table table-id))]
+    (str (.parse ^Parser parser ^java.io.InputStream stream))
     {:status 410 ; Gone
      :body "Please (re-)register your grammar or table."}))
 
@@ -31,11 +34,8 @@
   ([def module]
      (sh (:s2t-exec @config) "-m" module :in def :out-enc :bytes)))
 
-(defn make-parser [tbl]
-  (Parser. ^bytes tbl))
-
 (defn register-table [id tbl]
-  (swap! parser-cache assoc id (make-parser tbl))
+  (swap! table-cache assoc id tbl)
   {:status 201 ; Created
    :headers {"Location" (str "/table/" id)}
    :body id})
@@ -46,7 +46,7 @@
     (if (= "" def)
       {:status 400
        :body "No content. Fix your client. Try using Content-Type:application/x-sdf"}
-      (if (get-parser hash)
+      (if (get-table hash)
         hash
         (let [ext-call (sdf-to-table def module)]
           (if (= (:exit ext-call) 0)
@@ -58,7 +58,7 @@
   (POST "/grammar" {body                                  :body
                     {module "module" :or {module "Main"}} :params}
         (register-grammar body module))
-  (GET "/table" [] (apply str (interpose "\n" (keys @parser-cache))))
+  (GET "/table" [] (apply str (interpose "\n" (keys @table-cache))))
   (GET "/parse/:table-id" {{table-id :table-id} :params
                            body :body} (parse table-id body))
   (POST "/parse/:table-id" {{table-id :table-id} :params

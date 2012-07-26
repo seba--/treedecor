@@ -1,6 +1,5 @@
 package org.treedecor.imp;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import org.eclipse.core.runtime.IPath;
@@ -13,16 +12,12 @@ import org.eclipse.imp.parser.ISourcePositionLocator;
 import org.eclipse.imp.services.IAnnotationTypeInfo;
 import org.eclipse.imp.services.ILanguageSyntaxProperties;
 import org.eclipse.jface.text.IRegion;
-import org.spoofax.jsglr.client.InvalidParseTableException;
-import org.spoofax.terms.ParseError;
-import org.treedecor.Parser;
 
 public class TreedecorParseController implements IParseController {
 
 	private IPath filePath;
 	private ISourceProject project;
 	private IMessageHandler messageHandler;
-	private Parser parser;
 
 	@Override
 	public IAnnotationTypeInfo getAnnotationTypeInfo() {
@@ -83,11 +78,6 @@ public class TreedecorParseController implements IParseController {
 		this.filePath = filePath;
 		this.project = project;
 		this.messageHandler = handler;
-		try {
-			this.parser = new Parser("../syntax.xml/xml.tbl");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	@Override

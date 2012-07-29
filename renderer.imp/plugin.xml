@@ -7,17 +7,17 @@
       <language
             url="https://github.com/seba--/treedecor"
             extensions="xml"
-            description="Decoupling IDEs from their languages"
-            language="treedecor">
+            description="Eclipse renderer for the treedecorations project"
+            language="Treedecorations">
       </language>
    </extension>
    <extension
          id="renderer.imp.parser"
-         name="treedecor Parser"
+         name="Treedecorations Parser"
          point="org.eclipse.imp.runtime.parser">
       <parser
-            class="org.treedecor.imp.TreedecorParseController"
-            language="treedecor">
+            class="org.treedecor.imp.TreedecorationsParseController"
+            language="Treedecorations">
       </parser>
    </extension>
 

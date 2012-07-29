@@ -1,6 +1,7 @@
 package org.treedecor;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -36,17 +37,24 @@ import org.spoofax.terms.TermFactory;
 import org.spoofax.terms.io.binary.TermReader;
 
 public class Parser {
-	protected final ITermFactory termFactory = new TermFactory();
+	protected final static ITermFactory termFactory = new TermFactory();
 	protected final ParseTable parseTable;
 	protected final SGLR parser;
 	
-	public Parser(String pathToTable) throws ParseError, IOException, InvalidParseTableException {
-		IStrategoTerm parseTableTerm = new TermReader(termFactory).parseFromFile(pathToTable);
+	private Parser(IStrategoTerm parseTableTerm) throws InvalidParseTableException {
 		parseTable = new ParseTable(parseTableTerm, termFactory);
 		ITreeBuilder treeBuilder = new TreeBuilder(false);
 		parser = new SGLR(treeBuilder, parseTable);		
 		// Absolutely need to set this (not necessarily to true, crashes otherwise)
 		parser.setUseStructureRecovery(true);
+	}
+	
+	public Parser(byte[] table) throws ParseError, InvalidParseTableException, IOException {
+		this(new TermReader(termFactory).parseFromStream(new ByteArrayInputStream(table)));
+	}
+	
+	public Parser(String pathToTable) throws ParseError, IOException, InvalidParseTableException {
+		this(new TermReader(termFactory).parseFromFile(pathToTable));
 	}
 
 	public IStrategoTerm parse(File f) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, IOException {
@@ -150,9 +158,9 @@ public class Parser {
 		return sw.toString();
 	}
 	
-	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {
+	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {		
 		Options options = new Options();
-		options.addOption("t", true, "Path to grammar's .tbl file");
+		options.addOption("t", true, "Path to grammar's .tbl file (required)");
 		options.addOption("i", true, "Input file to be parsed, omit to read from std in");
 		options.addOption("o", true, "Write output to file, omit to write to std out");
 		options.addOption("h", "help", false, "Print help");

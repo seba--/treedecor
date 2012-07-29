@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SGLR Parsing as a Service</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript">
+      function postParseSuccess(responseText) {
+        $('[name=parsecontent]').val(responseText)
+      }
+
+      function postParseError(jqxhr) {
+        alert(jqxhr.responseText)
+      }
+
+      function parse() {
+        $.ajax("parse/" + $('[name=parserID]').val(),
+               {'data':$('[name=parsecontent]').val(),
+                'type': 'POST',
+                'processData': false,
+                'contentType': 'text/plain',
+                'success':postParseSuccess,
+                'error':postParseError})
+      }
+
+      function postDefError(jqxhr) {
+        alert("sdf2table failed. Error:\n" + jqxhr.responseText)
+      }
+
+      function postDefSuccess(responseText) {
+        var id = responseText
+        $('[name=parserID]').val(id)
+        alert("Use this parser ID: " + id)
+        var jump = $('[name=parse]')
+        var new_position = jump.offset()
+        window.scrollTo(new_position.left,new_position.top)
+      }
+
+      function postDef() {
+        $.ajax("grammar?module="+$('[name=module]').val(),
+               {'data':$('[name=defcontent]').val(),
+                'type': 'POST',
+                'processData': false,
+                'contentType': 'application/x-sdf',
+                'success':postDefSuccess,
+                'error':postDefError})
+      }
+    </script>
+  </head>
+  <body>
+    <h1>SGLR Parsing as a Service</h1>
+    <h3><a name="parse">Parse</a></h3>
+    <form>
+      <p><textarea name="parsecontent" type="" cols="80" rows="24"></textarea></p>
+      <p>Parser ID: <input name="parserID" type="text"/> <small>If you don't have one, get one by creating a parser from a SDF <a href="#def">grammar .def</a></small></p>
+      <p><input type="button" value="Parse" onClick="parse()"/></p>
+    </form>
+    <h3><a name="def">Create parser from .def</a></h3>
+    <form>
+      <p><textarea name="defcontent" type="" cols="80" rows="24"></textarea></p>
+      <p>Module: <input name="module" type="text"/> <small>defaults to Main</small></p>
+      <p><input type="button" value="Submit" onClick="postDef()"/></p>
+    </form>
+  </body>
+</html>

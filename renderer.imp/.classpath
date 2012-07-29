@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/strategoxt.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="/home/stefan/Work/treedecor/parser/lib/strategoxt.jar" sourcepath="/home/stefan/Work/spoofax"/>
@@ -12,5 +11,6 @@
 	<classpathentry kind="lib" path="lib/httpclient-cache-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

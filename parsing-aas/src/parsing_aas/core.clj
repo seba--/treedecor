@@ -25,8 +25,8 @@
   (Parser. ^bytes tbl))
 
 (defn parse [table-id stream]
-  (if-let [parser (make-parser (get-table table-id))]
-    (str (.parse ^Parser parser ^java.io.InputStream stream))
+  (if-let [table (get-table table-id)]
+    (str (.parse ^Parser (make-parser table) ^java.io.InputStream stream))
     {:status 410 ; Gone
      :body "Please (re-)register your grammar or table."}))
 

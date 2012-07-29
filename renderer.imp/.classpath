@@ -4,5 +4,12 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="/home/stefan/Work/treedecor/parser/lib/strategoxt.jar" sourcepath="/home/stefan/Work/spoofax"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/fluent-hc-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-cache-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

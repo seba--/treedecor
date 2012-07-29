@@ -72,15 +72,17 @@
       (wrap-params)
       (wrap-stacktrace)))
 
-(comment ;; use this instead of defonce for deployment
-  (defn -main [& args]
-    (swap! config merge (read-string (first args)))
-    (swap! parser-cache #(cache/lru-cache-factory (:parser-cache-size @config) %))
-    (reinit!)
-    (run-jetty #'app {:port (:port @config)})))
-
-(defonce server
+(defn -main [& args]
+  (println "Config string:" args)
+  (let [new-config (if args (read-string (first args)) {})]
+    (swap! config merge new-config))
+  (println "Effective config:" @config)
+  (swap! table-cache #(cache/lru-cache-factory (:table-cache-size @config) %))
   (run-jetty #'app {:port (:port @config)}))
+
+(comment
+  (defonce server
+    (run-jetty #'app {:port (:port @config)})))
 
 
 ;; install localrepo leiningen plugin:

@@ -1,7 +1,12 @@
 package org.treedecor.imp;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 
+import org.apache.http.client.ClientProtocolException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.imp.language.Language;
@@ -12,12 +17,17 @@ import org.eclipse.imp.parser.ISourcePositionLocator;
 import org.eclipse.imp.services.IAnnotationTypeInfo;
 import org.eclipse.imp.services.ILanguageSyntaxProperties;
 import org.eclipse.jface.text.IRegion;
+import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.treedecor.ParserClient;
 
 public class TreedecorationsParseController implements IParseController {
 
 	private IPath filePath;
 	private ISourceProject project;
 	private IMessageHandler messageHandler;
+	private IStrategoTerm currentAst;
+	private String currentSource;
+	private ParserClient parserClient;
 
 	@Override
 	public IAnnotationTypeInfo getAnnotationTypeInfo() {
@@ -54,8 +64,7 @@ public class TreedecorationsParseController implements IParseController {
 	@Override
 	public ISourcePositionLocator getSourcePositionLocator() {
 		System.out.println("getSourcePositionLocator");
-		// TODO Auto-generated method stub
-		return null;
+		return new TreedecorationsSourcePositionLocator(currentSource);
 	}
 
 	@Override
@@ -77,45 +86,39 @@ public class TreedecorationsParseController implements IParseController {
 		this.filePath = filePath;
 		this.project = project;
 		this.messageHandler = handler;
+		try {
+			this.parserClient = new ParserClient(new File("/home/stefan/Work/treedecor/syntax.xml/xml.def"), "xml", new URI("http://localhost:8080"));
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public IStrategoTerm parse(String input, IProgressMonitor monitor) {
 		System.out.println("parse");
+		IStrategoTerm parseResult;
 		try {
-			String parseResult = CommandExecution.callSync(getParserExe(), input);
+			parseResult = parserClient.parse(input);
 			System.out.println("Parse result:");
 			System.out.println(parseResult);
-			String decorationResult = CommandExecution.callSync(getDecoratorExe(), parseResult);
-			System.out.println("Decoration result string:");
-			System.out.println(decorationResult);
-			currentAst = parseDecorated(decorationResult);
+
+			// TODO actually decorate
+			currentAst = parseResult;
 			System.out.println("Decoration result ast:");
 			System.out.println(currentAst);
+
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		currentSource = input;
 		return getCurrentAst();
-	}
-
-	// TODO: move and make this user configurable
-	private String[] getParserExe() {
-		String[] parserExe = {"/home/stefan/Work/treedecor/parser/parser.sh", "-t", "/home/stefan/Work/treedecor/syntax.xml/xml.tbl"};
-		return parserExe;
-	}
-	
-	// TODO: move and make this user configurable
-	private String[] getDecoratorExe() {
-		String[] decoratorExe = {"/home/stefan/Work/treedecor/decorator.xml/decorator.sh"};
-		return decoratorExe;
-	}
-	
-	private IStrategoTerm parseDecorated(String s) {
-		StringTermReader str = new StringTermReader(new TermFactory());
-		return str.parseFromString(s);
 	}
 }

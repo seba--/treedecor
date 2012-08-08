@@ -32,7 +32,7 @@ public class TreedecorationsParseController implements IParseController {
 	@Override
 	public IAnnotationTypeInfo getAnnotationTypeInfo() {
 		System.out.println("getAnnotationTypeInfo");
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stubs
 		return null;
 	}
 

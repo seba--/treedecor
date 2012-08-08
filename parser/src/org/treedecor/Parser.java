@@ -79,16 +79,20 @@ public class Parser {
 			@Override
 			public IStrategoList invoke(IStrategoTerm term) {
 				ImploderAttachment imploderAttachment = term.getAttachment(ImploderAttachment.TYPE);
+				int startOffset = imploderAttachment.getLeftToken().getStartOffset();
 				int startColumn = imploderAttachment.getLeftToken().getColumn();
 				int startLine = imploderAttachment.getLeftToken().getLine();
 				int endColumn = imploderAttachment.getRightToken().getEndColumn();
-				int endLine = imploderAttachment.getLeftToken().getEndLine();
-				
+				int endLine = imploderAttachment.getRightToken().getEndLine();
+				int endOffset = imploderAttachment.getRightToken().getEndOffset();
+
 				return termFactory.makeList(
+						makeStringIntPair("startOffset", startOffset),
 						makeStringIntPair("startColumn", startColumn),
 						makeStringIntPair("startLine", startLine),
 						makeStringIntPair("endColumn", endColumn),
-						makeStringIntPair("endLine", endLine));
+						makeStringIntPair("endLine", endLine),
+						makeStringIntPair("endOffset", endOffset));
 			}
 		});
 		return parseResultWithSourceLocation;

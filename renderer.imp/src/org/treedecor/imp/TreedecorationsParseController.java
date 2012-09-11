@@ -26,7 +26,6 @@ public class TreedecorationsParseController implements IParseController {
 	private ISourceProject project;
 	private IMessageHandler messageHandler;
 	private IStrategoTerm currentAst;
-	private String currentSource;
 	private ParserClient parserClient;
 
 	@Override
@@ -64,7 +63,7 @@ public class TreedecorationsParseController implements IParseController {
 	@Override
 	public ISourcePositionLocator getSourcePositionLocator() {
 		System.out.println("getSourcePositionLocator");
-		return new TreedecorationsSourcePositionLocator(currentSource);
+		return new TreedecorationsSourcePositionLocator();
 	}
 
 	@Override
@@ -118,7 +117,6 @@ public class TreedecorationsParseController implements IParseController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		currentSource = input;
 		return getCurrentAst();
 	}
 }

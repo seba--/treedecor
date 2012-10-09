@@ -91,13 +91,14 @@ public class TreedecorationsSourcePositionLocator implements ISourcePositionLoca
 	public int getLength(Object entity) {
 		System.out.println("getLength(Object)");
 		System.out.println(entity);
-		// TODO Auto-generated method stub
-		return 0;
+		int length = getEndOffset(entity) - getStartOffset(entity);
+		// NOTE no idea what the contract is here, just return the difference of offsets for now.
+		return length;
 	}
 
 	@Override
 	public IPath getPath(Object node) {
-		System.out.println("getLength(Object)");
+		System.out.println("getPath(Object)");
 		System.out.println(node);
 		// TODO Auto-generated method stub
 		return null;

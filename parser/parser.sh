@@ -11,6 +11,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # echo "Done" >> log
 # echo `date` >> log
 
-# tee stdin | java -jar "$DIR/treedecor-parser-0.0.1.jar" $@ | tee stdout
+# tee stdin | java -jar "$DIR/treedecor-parser-0.0.4.jar" $@ | tee stdout
 
-java -jar "$DIR/treedecor-parser-0.0.1.jar" $@
+java -jar "$DIR/treedecor-parser-0.0.4.jar" $@

@@ -71,7 +71,7 @@ public class Parser {
 	
 	public IStrategoTerm parse(String s, String fileName) throws TokenExpectedException, BadTokenException, ParseException, SGLRException {
 		IStrategoTerm parseResult = (IStrategoTerm) parser.parse(s, fileName);
-		IStrategoTerm parseResultWithSourceLocation = annotateTree(parseResult, new IFn<IStrategoList, IStrategoTerm>() {
+		final IFn<IStrategoList, IStrategoTerm> leafF = new IFn<IStrategoList, IStrategoTerm>() {
 			private IStrategoTuple makeStringIntPair(String s, int i) {
 				return termFactory.makeTuple(termFactory.makeString(s), termFactory.makeInt(i));
 			}
@@ -94,30 +94,39 @@ public class Parser {
 						makeStringIntPair("endLine", endLine),
 						makeStringIntPair("endOffset", endOffset));
 			}
-		});
+		};
+		
+		IStrategoTerm parseResultWithSourceLocation = annotateTree(parseResult, leafF, new IFn2<IStrategoList, IStrategoTerm, IStrategoTerm[]>() {
+			@Override
+			public IStrategoList invoke(IStrategoTerm oldTerm, IStrategoTerm[] newChildren) {
+				// NOTE possibly need to infer source code location from children, if the imploderAttachment does not cover this
+				// If the imploderAttachment contains all necessary information, we can drop the second function from annotateTree(t,f,f)
+				return leafF.invoke(oldTerm);
+			}});
 		return parseResultWithSourceLocation;
 	}
 	
-	/** 
-	 * Bottom up tree annotator.
+	/**
+	 * Bottom up tree annotator
 	 * 
-	 * Takes a IStratgeoTerm term,
-	 * and a function f, that given an IStrategoTerm returns an IStrategoList suitable for annotations,
-	 * and returns a new tree where each node is annotated with the result of calling f on it.
+	 * @param term Root of the tree that should be decorated
+	 * @param leafF Function that will be called on leaf nodes, should take the node as an argument and return an IStrategoList of annotations
+	 * @param nonLeafF Function that will be called on non-leaf nodes, should take an old version of the node (old children, old annotations) and an array of it's children which have already been processed by leafF. Should return an IStrategoList of annotations
+	 * @return A new annotated tree
 	 */
-	protected IStrategoTerm annotateTree(IStrategoTerm term, IFn<IStrategoList, IStrategoTerm> f) {
+	protected IStrategoTerm annotateTree(IStrategoTerm term, IFn<IStrategoList, IStrategoTerm> leafF, IFn2<IStrategoList, IStrategoTerm, IStrategoTerm[]> nonLeafF) {
 		// in leaf
 		if (term.getAllSubterms().length == 0) {
-			return termFactory.annotateTerm(term, f.invoke(term));
+			return termFactory.annotateTerm(term, leafF.invoke(term));
 		}
 		
 		// descend into children
 		IStrategoTerm[] children = term.getAllSubterms().clone();
 		for (int i = 0; i < children.length; i++) {
-			children[i] = annotateTree(term.getSubterm(i), f);
+			children[i] = annotateTree(term.getSubterm(i), leafF, nonLeafF);
 		}
 		// rebuild current term with newly annotated children
-		IStrategoList annotations = term.getAnnotations();
+		IStrategoList annotations = nonLeafF.invoke(term, children);
 		switch (term.getTermType()) {
 		case IStrategoTerm.APPL:
 			return termFactory.makeAppl(((IStrategoAppl) term).getConstructor(), children, annotations);

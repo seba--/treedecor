@@ -10,7 +10,7 @@
   (:import java.util.UUID
            org.treedecor.Parser))
 
-(def config (atom {:s2t-exec         "/usr/bin/sdf2table"
+(def config (atom {:s2t-exec         nil
                    :port             8080
                    :table-cache-size 20}))
 
@@ -32,7 +32,8 @@
 
 (defn sdf-to-table
   ([def module]
-     (sh (:s2t-exec @config) "-m" module :in def :out-enc :bytes)))
+     (sh (or (:s2t-exec @config) "sdf2table")
+         "-m" module :in def :out-enc :bytes)))
 
 (defn register-table [id tbl]
   (swap! table-cache assoc id tbl)

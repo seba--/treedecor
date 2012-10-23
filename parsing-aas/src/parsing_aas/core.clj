@@ -18,6 +18,14 @@
 
 (defn uuid [] (.toString (java.util.UUID/randomUUID)))
 
+(defmacro log [message & body]
+  `(let [start# (System/nanoTime)
+         ~'_ (println "Start" ~message "at" start#)
+         ret# (do ~@body)
+         end# (System/nanoTime)]
+     (println "End" ~message "at" end# "Duration:" (/ (- end# start#) 1000000.0) "ms")
+     ret#))
+
 (defn get-table [grammar-hash]
   (get @table-cache grammar-hash))
 
@@ -25,10 +33,11 @@
   (Parser. ^bytes tbl))
 
 (defn parse [table-id stream]
-  (if-let [table (get-table table-id)]
-    (str (.parse ^Parser (make-parser table) ^java.io.InputStream stream))
-    {:status 410 ; Gone
-     :body "Please (re-)register your grammar or table."}))
+  (log "parse request"
+       (if-let [table (log "lookup table in cache" (get-table table-id))]
+         (str (log "actually parsing" (.parse ^Parser (log "create parser" (make-parser table)) ^java.io.InputStream stream)))
+         {:status 410 ; Gone
+          :body "Please (re-)register your grammar or table."})))
 
 (defn sdf-to-table
   ([def module]

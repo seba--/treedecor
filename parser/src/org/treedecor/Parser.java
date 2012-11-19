@@ -71,7 +71,11 @@ public class Parser {
 	
 	public IStrategoTerm parse(String s, String fileName) throws TokenExpectedException, BadTokenException, ParseException, SGLRException {
 		IStrategoTerm parseResult = (IStrategoTerm) parser.parse(s, fileName);
-		IStrategoTerm parseResultWithSourceLocation = annotateTree(parseResult, new IFn<IStrategoList, IStrategoTerm>() {
+		return parseResult;
+	}
+	
+	public static IStrategoTerm annotateSourceLocationInformation(IStrategoTerm ast) {
+		IStrategoTerm parseResultWithSourceLocation = annotateTree(ast, new IFn<IStrategoList, IStrategoTerm>() {
 			private IStrategoTuple makeStringIntPair(String s, int i) {
 				return termFactory.makeTuple(termFactory.makeString(s), termFactory.makeInt(i));
 			}
@@ -96,6 +100,7 @@ public class Parser {
 			}
 		});
 		return parseResultWithSourceLocation;
+
 	}
 	
 	/** 
@@ -105,7 +110,7 @@ public class Parser {
 	 * and a function f, that given an IStrategoTerm returns an IStrategoList suitable for annotations,
 	 * and returns a new tree where each node is annotated with the result of calling f on it.
 	 */
-	protected IStrategoTerm annotateTree(IStrategoTerm term, IFn<IStrategoList, IStrategoTerm> f) {
+	private static IStrategoTerm annotateTree(IStrategoTerm term, IFn<IStrategoList, IStrategoTerm> f) {
 		// in leaf
 		if (term.getAllSubterms().length == 0) {
 			return termFactory.annotateTerm(term, f.invoke(term));
@@ -164,10 +169,11 @@ public class Parser {
 	
 	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {		
 		Options options = new Options();
-		options.addOption("t", true, "Path to grammar's .tbl file (required)");
-		options.addOption("i", true, "Input file to be parsed, omit to read from std in");
-		options.addOption("o", true, "Write output to file, omit to write to std out");
-		options.addOption("h", "help", false, "Print help");
+		options.addOption("t", true, "Path to grammar's .tbl file (required).");
+		options.addOption("i", true, "Input file to be parsed, omit to read from std in.");
+		options.addOption("o", true, "Write output to file, omit to write to std out.");
+		options.addOption(null, "disable-source-location-information", false, "Do not include source location information. Defaults to false.");
+		options.addOption("h", "help", false, "Print this help.");
 		CommandLine line = (new PosixParser()).parse(options, args);
 		
 		if (!line.hasOption("t") || line.hasOption("h")) {
@@ -182,6 +188,9 @@ public class Parser {
 		} else {
 			parseResult = parser.parse(System.in);
 		}
+		
+		if (!line.hasOption("disable-source-location-information"))
+			parseResult = annotateSourceLocationInformation(parseResult);
 		
 		if (line.hasOption("o")) {
 			new FileWriter(line.getOptionValue("o")).write(parseResult.toString());

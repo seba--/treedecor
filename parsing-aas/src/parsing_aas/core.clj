@@ -32,10 +32,13 @@
 (defn make-parser [tbl]
   (Parser. ^bytes tbl))
 
-(defn parse [table-id stream]
+(defn parse [table-id stream do-not-annotate]
   (log "parse request"
        (if-let [table (log "lookup table in cache" (get-table table-id))]
-         (str (log "actually parsing" (.parse ^Parser (log "create parser" (make-parser table)) ^java.io.InputStream stream)))
+         (let [parse-result (log "actually parsing" (.parse ^Parser (log "create parser" (make-parser table)) ^java.io.InputStream stream))]
+           (if do-not-annotate
+             (str parse-result)
+             (str (log "annotate source location information" (Parser/annotateSourceLocationInformation ^IStrategoTerm parse-result)))))
          {:status 410 ; Gone
           :body "Please (re-)register your grammar or table."})))
 
@@ -69,10 +72,10 @@
                     {module "module" :or {module "Main"}} :params}
         (register-grammar body module))
   (GET "/table" [] (apply str (interpose "\n" (keys @table-cache))))
-  (GET "/parse/:table-id" {{table-id :table-id} :params
-                           body :body} (parse table-id body))
-  (POST "/parse/:table-id" {{table-id :table-id} :params
-                            body :body} (parse table-id body))
+  (ANY "/parse/:table-id" {body :body
+                         {table-id :table-id
+                          do-not-annotate "disableSourceLocationInformation"} :params}
+       (parse table-id body (= do-not-annotate "true")))
   (POST "/table" {body :body} (register-table (uuid) body))
   (files "/" {:root "web"})
 )

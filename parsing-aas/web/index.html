@@ -5,7 +5,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script type="text/javascript">
       function postParseSuccess(responseText) {
-        $('[name=parsecontent]').val(responseText)
+        $('[name=parseresult]').text(responseText)
       }
 
       function postParseError(jqxhr) {
@@ -13,7 +13,9 @@
       }
 
       function parse() {
-        $.ajax("parse/" + $('[name=parserID]').val(),
+        // clear result area
+        $('#parseResult').text("")
+        $.ajax("parse/" + $('[name=parserID]').val() + ($('[name=disableSourceLocationInformation]').is(':checked') ? "?disableSourceLocationInformation=true" : ""),
                {'data':$('[name=parsecontent]').val(),
                 'type': 'POST',
                 'processData': false,
@@ -52,8 +54,10 @@
     <form>
       <p><textarea name="parsecontent" type="" cols="80" rows="24"></textarea></p>
       <p>Parser ID: <input name="parserID" type="text"/> <small>If you don't have one, get one by creating a parser from a SDF <a href="#def">grammar .def</a></small></p>
-      <p><input type="button" value="Parse" onClick="parse()"/></p>
+      <p><input type="checkbox" name="disableSourceLocationInformation" checked>Disable source location information <input type="button" value="Parse" onClick="parse()"/></p>
     </form>
+    <h3>Parse result</h3>
+    <textarea name="parseresult" type="" cols="80" rows="24"></textarea>
     <h3><a name="def">Create parser from .def</a></h3>
     <form>
       <p><textarea name="defcontent" type="" cols="80" rows="24"></textarea></p>

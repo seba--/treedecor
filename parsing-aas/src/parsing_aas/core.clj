@@ -8,6 +8,7 @@
   (:require [clojure.java.io :as io]
             [clojure.core.cache :as cache])
   (:import java.util.UUID
+           java.io.File
            org.treedecor.Parser))
 
 (def config (atom {:s2t-exec         nil
@@ -42,10 +43,34 @@
          {:status 410 ; Gone
           :body "Please (re-)register your grammar or table."})))
 
-(defn sdf-to-table
-  ([def module]
-     (sh (or (:s2t-exec @config) "sdf2table")
-         "-m" module :in def :out-enc :bytes)))
+(defmacro with-temp-file
+  "Create a temporary file and delete it after executing `body`.
+   You can refer to the temporary file with the symbol `name`.
+   Note that `name` will be bound to a java.io.File object, call .getAbsolutePath to get it's path.
+   The file will named prefixSomethingPostfix and be in the system's temp dir.
+   Refer to java.io.File/createTempFile for details."
+  [name prefix postfix & body]
+  `(let [~name (java.io.File/createTempFile ~prefix ~postfix)]
+     (try (do~@body)
+        (finally (.delete ~name)))))
+
+(defn sdf-to-table [def module]
+  ;; HACK: We need to create a temporary file because the sdf2table version
+  ;; from the native bundle is broken when using standard input
+  ;; HACK2: We need to create a second temporary file for the output, because
+  ;; apparently, standard output handling is broken as soon as you do not use
+  ;; standard input but input from file. You couldn't make this stuff up...
+  (with-temp-file def-tmp-file "def-tmp-file" ".def"
+    (with-temp-file tbl-tmp-file "tbl-tmp-file" ".tbl"
+      (spit def-tmp-file def)
+      (let [ext-call (sh (or (:s2t-exec @config) "sdf2table")
+                         "-m" module
+                         "-i" (.getAbsolutePath def-tmp-file)
+                         "-o" (.getAbsolutePath tbl-tmp-file))
+            tbl (byte-array (.length tbl-tmp-file))]
+        (with-open [reader (io/input-stream tbl-tmp-file)]
+          (.read reader tbl))
+        (assoc ext-call :out tbl)))))
 
 (defn register-table [id tbl]
   (swap! table-cache assoc id tbl)

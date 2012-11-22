@@ -5,7 +5,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script type="text/javascript">
       function postParseSuccess(responseText) {
-        $('[name=parseresult]').text(responseText)
+        $('[name=parseresult]').val(responseText)
       }
 
       function postParseError(jqxhr) {
@@ -14,7 +14,7 @@
 
       function parse() {
         // clear result area
-        $('#parseResult').text("")
+        $('[name=parseresult]').val("")
         $.ajax("parse/" + $('[name=parserID]').val() + ($('[name=disableSourceLocationInformation]').is(':checked') ? "?disableSourceLocationInformation=true" : ""),
                {'data':$('[name=parsecontent]').val(),
                 'type': 'POST',

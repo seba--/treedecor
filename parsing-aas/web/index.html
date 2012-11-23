@@ -46,6 +46,22 @@
                 'success':postDefSuccess,
                 'error':postDefError})
       }
+
+      languageModules = {
+        "xml.def" : "xml",
+        "Java-15.def" : "Main",
+        "Haskell.def" : "Haskell"
+      }                         
+
+      function loadDefaultGrammar() {
+        var language = $('[name=defaultDef]').val()
+        $.ajax("grammars/"+language, 
+          {'success': function (_1, _2, response) {
+             var def = response.responseText
+             $('[name=defcontent]').val(def)
+             $('[name=module]').val(languageModules[language])
+           }})
+      }
     </script>
   </head>
   <body>
@@ -60,6 +76,14 @@
     <textarea name="parseresult" type="" cols="80" rows="24"></textarea>
     <h3><a name="def">Create parser from .def</a></h3>
     <form>
+      <p>Load example grammar:
+        <select name="defaultDef">
+          <option value="Java-15.def">Java</option>
+          <option value="Haskell.def">Haskell</option>
+          <option value="xml.def">XML</option>
+        </select>
+        <input type="button" value="Load" onClick="loadDefaultGrammar()">
+      </p>
       <p><textarea name="defcontent" type="" cols="80" rows="24"></textarea></p>
       <p>Module: <input name="module" type="text"/> <small>defaults to Main</small></p>
       <p><input type="button" value="Submit" onClick="postDef()"/></p>

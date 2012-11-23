@@ -15,7 +15,10 @@
       function parse() {
         // clear result area
         $('[name=parseresult]').val("")
-        $.ajax("parse/" + $('[name=parserID]').val() + ($('[name=disableSourceLocationInformation]').is(':checked') ? "?disableSourceLocationInformation=true" : ""),
+        $.ajax("parse/" + $('[name=parserID]').val() + "?" + $.param({
+              "disableSourceLocationInformation" : $('[name=disableSourceLocationInformation]').is(':checked') ? "true" : "false",
+              "prettyPrint" : $('[name=prettyPrint]').is(':checked') ? "true" : "false"
+            }),
                {'data':$('[name=parsecontent]').val(),
                 'type': 'POST',
                 'processData': false,
@@ -70,7 +73,10 @@
     <form>
       <p><textarea name="parsecontent" type="" cols="80" rows="24"></textarea></p>
       <p>Parser ID: <input name="parserID" type="text"/> <small>If you don't have one, get one by creating a parser from a SDF <a href="#def">grammar .def</a></small></p>
-      <p><input type="checkbox" name="disableSourceLocationInformation" checked>Disable source location information <input type="button" value="Parse" onClick="parse()"/></p>
+      <p>
+        <input type="checkbox" name="disableSourceLocationInformation" checked>Disable source location information <br />
+        <input type="checkbox" name="prettyPrint" checked>Pretty print <br />
+        <input type="button" value="Parse" onClick="parse()"/></p>
     </form>
     <h3>Parse result</h3>
     <textarea name="parseresult" type="" cols="80" rows="24"></textarea>

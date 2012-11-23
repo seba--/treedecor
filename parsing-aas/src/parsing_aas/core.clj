@@ -9,7 +9,11 @@
             [clojure.core.cache :as cache])
   (:import java.util.UUID
            java.io.File
-           org.treedecor.Parser))
+           org.treedecor.Parser
+           org.spoofax.interpreter.terms.IStrategoTerm
+           org.spoofax.terms.io.InlinePrinter
+;           org.spoofax.interpreter.terms.PrettyPrinter
+           ))
 
 (def config (atom {:s2t-exec         nil
                    :port             55123
@@ -33,13 +37,23 @@
 (defn make-parser [tbl]
   (Parser. ^bytes tbl))
 
-(defn parse [table-id stream do-not-annotate]
+(defn parse [table-id stream do-not-annotate pretty-print]
   (log "parse request"
        (if-let [table (log "lookup table in cache" (get-table table-id))]
-         (let [parse-result (log "actually parsing" (.parse ^Parser (log "create parser" (make-parser table)) ^java.io.InputStream stream))]
-           (if do-not-annotate
-             (str parse-result)
-             (str (log "annotate source location information" (Parser/annotateSourceLocationInformation ^IStrategoTerm parse-result)))))
+         (try
+           (let [parse-result (log "actually parsing" (.parse ^Parser (log "create parser" (make-parser table)) ^java.io.InputStream stream))
+                 maybe-annotated (if do-not-annotate
+                                   parse-result
+                                   (log "annotate source location information" (Parser/annotateSourceLocationInformation ^IStrategoTerm parse-result)))]
+             (if pretty-print
+               (let [printer (InlinePrinter.) ;(PrettyPrinter.)
+                     ]
+                 (.prettyPrint ^IStrategoTerm maybe-annotated printer)
+                 (.getString printer))
+               (str maybe-annotated)))
+           (catch Exception e
+             {:status 400
+              :body (str e)}))
          {:status 410 ; Gone
           :body "Please (re-)register your grammar or table."})))
 
@@ -104,8 +118,9 @@
   (GET "/table" [] (apply str (interpose "\n" (keys @table-cache))))
   (ANY "/parse/:table-id" {body :body
                            {table-id :table-id
-                            do-not-annotate "disableSourceLocationInformation"} :params}
-       (parse table-id body (= do-not-annotate "true")))
+                            do-not-annotate "disableSourceLocationInformation"
+                            pretty-print "prettyPrint"} :params}
+       (parse table-id body (= do-not-annotate "true") (= pretty-print "true")))
   (POST "/table" {body :body} (register-table (uuid) body))
   (files "/" {:root "web"})
 )

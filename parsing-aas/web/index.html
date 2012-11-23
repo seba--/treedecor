@@ -28,8 +28,8 @@
         alert("sdf2table failed. Error:\n" + jqxhr.responseText)
       }
 
-      function postDefSuccess(responseText) {
-        var id = responseText
+      function postDefSuccess(_1, _2, response) {
+        var id = response.responseText
         $('[name=parserID]').val(id)
         alert("Use this parser ID: " + id)
         var jump = $('[name=parse]')

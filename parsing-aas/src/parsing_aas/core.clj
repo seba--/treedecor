@@ -12,7 +12,7 @@
            org.treedecor.Parser))
 
 (def config (atom {:s2t-exec         nil
-                   :port             8080
+                   :port             55123
                    :table-cache-size 20}))
 
 (def table-cache (atom {}))
@@ -72,23 +72,28 @@
           (.read reader tbl))
         (assoc ext-call :out tbl)))))
 
-(defn register-table [id tbl]
-  (swap! table-cache assoc id tbl)
+(defn created-table-response [id]
   {:status 201 ; Created
    :headers {"Location" (str "/table/" id)}
    :body id})
 
+(defn register-table [id tbl]
+  (swap! table-cache assoc id tbl)
+  id)
+
 (defn register-grammar [in-stream module]
   (let [def (slurp in-stream)
-        hash (str (hash def))]
+        hash (str module (hash def))]
     (if (= "" def)
       {:status 400
        :body "No content. Fix your client. Try using Content-Type:application/x-sdf"}
       (if (get-table hash)
-        hash
+        (created-table-response hash)
         (let [ext-call (sdf-to-table def module)]
           (if (= (:exit ext-call) 0)
-            (register-table hash (:out ext-call))
+            (do
+              (register-table hash (:out ext-call))
+              (created-table-response hash))
             {:status 422
              :body (:err ext-call)}))))))
 
@@ -98,8 +103,8 @@
         (register-grammar body module))
   (GET "/table" [] (apply str (interpose "\n" (keys @table-cache))))
   (ANY "/parse/:table-id" {body :body
-                         {table-id :table-id
-                          do-not-annotate "disableSourceLocationInformation"} :params}
+                           {table-id :table-id
+                            do-not-annotate "disableSourceLocationInformation"} :params}
        (parse table-id body (= do-not-annotate "true")))
   (POST "/table" {body :body} (register-table (uuid) body))
   (files "/" {:root "web"})

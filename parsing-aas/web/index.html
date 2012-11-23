@@ -15,7 +15,7 @@
       function parse() {
         // clear result area
         $('[name=parseresult]').val("")
-        $.ajax("parse/" + $('[name=parserID]').val() + "?" + $.param({
+        $.ajax("parse/" + encodeURIComponent($('[name=parserID]').val()) + "?" + $.param({
               "disableSourceLocationInformation" : $('[name=disableSourceLocationInformation]').is(':checked') ? "true" : "false",
               "prettyPrint" : $('[name=prettyPrint]').is(':checked') ? "true" : "false"
             }),

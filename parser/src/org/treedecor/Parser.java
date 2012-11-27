@@ -57,19 +57,19 @@ public class Parser {
 		this(new TermReader(termFactory).parseFromFile(pathToTable));
 	}
 
-	public IStrategoTerm parse(File f) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, IOException {
+	public IStrategoTerm parse(File f) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, IOException, InterruptedException {
 		return parse(fileContentAsString(f), f.getName());
 	}
 	
-	public IStrategoTerm parse(String s) throws TokenExpectedException, BadTokenException, ParseException, SGLRException {
+	public IStrategoTerm parse(String s) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, InterruptedException {
 		return parse(s, "No file");
 	}
 	
-	public IStrategoTerm parse(InputStream is) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, IOException {
+	public IStrategoTerm parse(InputStream is) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, IOException, InterruptedException {
 		return parse(inputStreamAsString(is), "System.in");
 	}
 	
-	public IStrategoTerm parse(String s, String fileName) throws TokenExpectedException, BadTokenException, ParseException, SGLRException {
+	public IStrategoTerm parse(String s, String fileName) throws TokenExpectedException, BadTokenException, ParseException, SGLRException, InterruptedException {
 		IStrategoTerm parseResult = (IStrategoTerm) parser.parse(s, fileName);
 		return parseResult;
 	}
@@ -167,7 +167,7 @@ public class Parser {
 		return sw.toString();
 	}
 	
-	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException {		
+	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException, InterruptedException {		
 		Options options = new Options();
 		options.addOption("t", true, "Path to grammar's .tbl file (required).");
 		options.addOption("i", true, "Input file to be parsed, omit to read from std in.");

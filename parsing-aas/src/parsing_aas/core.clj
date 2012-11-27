@@ -9,11 +9,7 @@
             [clojure.core.cache :as cache])
   (:import java.util.UUID
            java.io.File
-           org.treedecor.Parser
-           org.spoofax.interpreter.terms.IStrategoTerm
-           org.spoofax.terms.io.InlinePrinter
-;           org.spoofax.interpreter.terms.PrettyPrinter
-           ))
+           org.treedecor.Parser))
 
 (def config (atom {:s2t-exec         nil
                    :port             55123
@@ -44,12 +40,9 @@
            (let [parse-result (log "actually parsing" (.parse ^Parser (log "create parser" (make-parser table)) ^java.io.InputStream stream))
                  maybe-annotated (if do-not-annotate
                                    parse-result
-                                   (log "annotate source location information" (Parser/annotateSourceLocationInformation ^IStrategoTerm parse-result)))]
+                                   (log "annotate source location information" (Parser/annotateSourceLocationInformation parse-result)))]
              (if pretty-print
-               (let [printer (InlinePrinter.) ;(PrettyPrinter.)
-                     ]
-                 (.prettyPrint ^IStrategoTerm maybe-annotated printer)
-                 (.getString printer))
+               (log "pretty print" (Parser/prettyPrint maybe-annotated))
                (str maybe-annotated)))
            (catch Exception e
              {:status 400

@@ -34,10 +34,15 @@ import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.ParseError;
 import org.spoofax.terms.TermFactory;
+import org.spoofax.terms.io.InlinePrinter;
 import org.spoofax.terms.io.binary.TermReader;
+import org.strategoxt.lang.Context;
+import org.strategoxt.stratego_aterm.pp_aterm_box_0_1;
+import org.strategoxt.stratego_aterm.stratego_aterm;
 
 public class Parser {
 	protected final static ITermFactory termFactory = new TermFactory();
+	protected final static Context prettyPrintingContext = stratego_aterm.init();
 	protected final ParseTable parseTable;
 	protected final SGLR parser;
 	
@@ -166,13 +171,21 @@ public class Parser {
 		}
 		return sw.toString();
 	}
-	
+
+	public static String prettyPrint(IStrategoTerm parseResult) {
+		IStrategoTerm ppTerm = pp_aterm_box_0_1.instance.invoke(prettyPrintingContext, parseResult, termFactory.makeInt(Integer.MAX_VALUE));
+		InlinePrinter printer = new InlinePrinter();
+		ppTerm.prettyPrint(printer);
+		return printer.getString();
+	}
+
 	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException, InterruptedException {		
 		Options options = new Options();
 		options.addOption("t", true, "Path to grammar's .tbl file (required).");
 		options.addOption("i", true, "Input file to be parsed, omit to read from std in.");
 		options.addOption("o", true, "Write output to file, omit to write to std out.");
 		options.addOption(null, "disable-source-location-information", false, "Do not include source location information. Defaults to false.");
+		options.addOption(null, "disable-pretty-printing", false, "Disable AST pretty printing. Defaults to false.");
 		options.addOption("h", "help", false, "Print this help.");
 		CommandLine line = (new PosixParser()).parse(options, args);
 		
@@ -192,10 +205,12 @@ public class Parser {
 		if (!line.hasOption("disable-source-location-information"))
 			parseResult = annotateSourceLocationInformation(parseResult);
 		
+		String output = !line.hasOption("disable-pretty-printing") ? prettyPrint(parseResult) : parseResult.toString();
+		
 		if (line.hasOption("o")) {
-			new FileWriter(line.getOptionValue("o")).write(parseResult.toString());
+			new FileWriter(line.getOptionValue("o")).write(output);
 		} else {
-			System.out.append(parseResult.toString());
+			System.out.append(output);
 		}
 	}
 }

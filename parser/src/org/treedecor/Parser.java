@@ -173,7 +173,6 @@ public class Parser {
 	}
 
 	public static String prettyPrint(IStrategoTerm term) {
-	    Context ctx = stratego_aterm.init();
 	    IStrategoTerm aboxTerm = pp_aterm_box_0_1.instance.invoke(prettyPrintingContext, term, termFactory.makeInt(8));
 	    if (aboxTerm == null)
 	    	return null;

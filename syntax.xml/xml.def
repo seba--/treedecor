@@ -179,8 +179,6 @@ exports
 
     Prologue Element Epilogue -> Document {cons("Document")}
 
-    "<" QName Attribute* "/>" -> Element {cons("EmptyElement")}
-
     Element -> Content
     Comment -> Content {cons("Comment")}
     PI      -> Content
@@ -189,11 +187,14 @@ exports
 
     CharData      -> <Content-CF>
 
-    "<"
-    <LAYOUT?-CF> <QName-CF> <LAYOUT?-CF> <Attribute*-CF> <LAYOUT?-CF>
-      ">" <Content-CF>* "</"
-    <LAYOUT?-CF> <QName-CF> <LAYOUT?-CF>
-    ">"  -> <Element-CF> {cons("Element")}
+
+  context-free syntax
+    "<" QName Attribute* "/>" -> Element {cons("EmptyElement")}
+
+    "<" QName Attribute* ">"
+      Content* 
+    "</" QName ">"
+    -> Element {cons("Element")}
 
 module xml-names
 

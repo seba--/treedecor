@@ -19,7 +19,7 @@ exports
 	%% ... unless the `<' starts a CDATASection
     %% (It would be better to lift CDATASections from child to sibling of Text,
     %%  but this would change the structure of the AST...) 
-    CharData -/- [\<].[\!].[\[].[C].[D].[A].[T].[A].[\[]
+  %%  CharData -/- [\<].[\!].[\[].[C].[D].[A].[T].[A].[\[]
 
   lexical syntax
 

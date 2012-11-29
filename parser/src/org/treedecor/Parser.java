@@ -34,11 +34,11 @@ import org.spoofax.jsglr.shared.SGLRException;
 import org.spoofax.jsglr.shared.TokenExpectedException;
 import org.spoofax.terms.ParseError;
 import org.spoofax.terms.TermFactory;
-import org.spoofax.terms.io.InlinePrinter;
 import org.spoofax.terms.io.binary.TermReader;
 import org.strategoxt.lang.Context;
 import org.strategoxt.stratego_aterm.pp_aterm_box_0_1;
 import org.strategoxt.stratego_aterm.stratego_aterm;
+import org.strategoxt.stratego_gpp.box2text_string_0_1;
 
 public class Parser {
 	protected final static ITermFactory termFactory = new TermFactory();
@@ -172,11 +172,17 @@ public class Parser {
 		return sw.toString();
 	}
 
-	public static String prettyPrint(IStrategoTerm parseResult) {
-		IStrategoTerm ppTerm = pp_aterm_box_0_1.instance.invoke(prettyPrintingContext, parseResult, termFactory.makeInt(Integer.MAX_VALUE));
-		InlinePrinter printer = new InlinePrinter();
-		ppTerm.prettyPrint(printer);
-		return printer.getString();
+	public static String prettyPrint(IStrategoTerm term) {
+	    Context ctx = stratego_aterm.init();
+	    IStrategoTerm aboxTerm = pp_aterm_box_0_1.instance.invoke(prettyPrintingContext, term, termFactory.makeInt(8));
+	    if (aboxTerm == null)
+	    	return null;
+	    
+	    IStrategoTerm textTerm = box2text_string_0_1.instance.invoke(prettyPrintingContext, aboxTerm, termFactory.makeInt(80));
+	    if (textTerm.getTermType() == IStrategoTerm.STRING)
+	        return ((IStrategoString) textTerm).stringValue();
+	    
+	    return null;
 	}
 
 	public static void main(String[] args) throws org.apache.commons.cli.ParseException, ParseError, IOException, InvalidParseTableException, TokenExpectedException, BadTokenException, ParseException, SGLRException, InterruptedException {		
